@@ -970,9 +970,6 @@ pub fn get_api_server(api: String, custom: String) -> String {
     if res.starts_with("https") && res.ends_with(":21114") {
         return res.replace(":21114", "");
     }
-    if res.starts_with("http") && res.ends_with(":21114") {
-        return res.replace(":21114", "");
-    }
     res
 }
 
@@ -999,7 +996,7 @@ fn get_api_server_(api: String, custom: String) -> String {
             return format!("http://{}", s);
         }
     }
-    "http://qq.iw2u.cn"
+    "http://qq.iw2u.cn:21114"
 }
 
 #[inline]
