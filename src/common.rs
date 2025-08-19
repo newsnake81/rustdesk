@@ -1428,6 +1428,7 @@ pub async fn secure_tcp(conn: &mut Stream, key: &str) -> ResultType<()> {
     Ok(())
 }
 
+
 #[inline]
 fn get_pk(pk: &[u8]) -> Option<[u8; 32]> {
     if pk.len() == 32 {
