@@ -62,6 +62,7 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
   Timer? _timer;
   bool _showBar = !isWebDesktop;
   bool _showGestureHelp = false;
+  bool _isOrientationLocked = false;
   String _value = '';
   Orientation? _currentOrientation;
   final _uniqueKey = UniqueKey();
@@ -121,10 +122,48 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
           isKeyboardVisible: keyboardVisibilityController.isVisible);
     });
     WidgetsBinding.instance.addObserver(this);
+    gFFI.ffiModel.addListener(_onPeerInfoChanged);
   }
+
+void _onPeerInfoChanged() {
+    _checkAndSetOrientation();
+}
+
+void _checkAndSetOrientation() {
+    final rect = gFFI.ffiModel.rect;
+    if (rect == null) return;
+    
+    final isLandscape = rect.width > rect.height;
+    
+    if (isLandscape && !_isOrientationLocked) {
+        _lockToLandscape();
+    } else if (!isLandscape && _isOrientationLocked) {
+        _unlockOrientation();
+    }
+}
+
+void _lockToLandscape() {
+    _isOrientationLocked = true;
+    SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+    ]);
+}
+
+void _unlockOrientation() {
+    _isOrientationLocked = false;
+    SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+    ]);
+}
 
   @override
   Future<void> dispose() async {
+    gFFI.ffiModel.removeListener(_onPeerInfoChanged);
+    _unlockOrientation();
     WidgetsBinding.instance.removeObserver(this);
     // https://github.com/flutter/flutter/issues/64935
     super.dispose();
